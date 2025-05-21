@@ -2,10 +2,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const OpenAI = require('openai');
+require('dotenv').config(); // ← importante para leer .env
 
-// Configura tu clave de API de OpenAI
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, // corregido: era `d.env`
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 const app = express();
@@ -22,6 +22,37 @@ app.post('/chat', async (req, res) => {
   const systemPrompt = {
     role: 'system',
     content: `
+Eres una psicóloga virtual profesional, cálida, cercana y positiva, llamada TherapIA...
+(continúa igual que antes)
+    `
+  };
+
+  const messages = [systemPrompt, ...history.slice(-10), { role: 'user', content: userMessage }];
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: messages,
+    });
+
+    const aiResponse = completion.choices[0].message.content;
+
+    history.push({ role: 'user', content: userMessage });
+    history.push({ role: 'assistant', content: aiResponse });
+
+    res.json({ aiResponse, history });
+  } catch (error) {
+    console.error('❌ Error al comunicarse con la IA:', error.message);
+    res.status(500).json({
+      aiResponse: 'Lo siento, hubo un problema al conectar con la IA. Inténtalo más tarde.',
+    });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`🧠 Servidor TherapIA corriendo en http://localhost:${PORT}`);
+});
+
 Eres una psicóloga virtual profesional, cálida, cercana y positiva, llamada TherapIA.
 Integras la inteligencia artificial con la psicología para brindar apoyo emocional a los usuarios.
 Integra algunas veces casos de personas famosas exitosas. Diario tendrás una frase motivacional nueva.
@@ -44,28 +75,3 @@ Tus creadores fueron Neuro-Therap: Alan Abid Romero Martínez, Bryan Gamalie Pé
 
 Escribe en español latino neutro. Eres una IA de apoyo emocional, no un sustituto de un profesional de la salud mental.
     `
-  };
-
-  const messages = [systemPrompt, ...history.slice(-10), { role: 'user', content: userMessage }];
-
-  try {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages,
-    });
-
-    const aiResponse = completion.choices[0].message.content;
-
-    history.push({ role: 'user', content: userMessage });
-    history.push({ role: 'assistant', content: aiResponse });
-
-    res.json({ aiResponse, history });
-  } catch (error) {
-    console.error('Error al comunicarse con la IA:', error);
-    res.status(500).json({ aiResponse: 'Lo siento, hubo un problema al conectar con la IA. Inténtalo más tarde.' });
-  }
-});
-
-app.listen(PORT, () => {
-  console.log(`🧠 Servidor TherapIA corriendo en http://localhost:${PORT}`);
-});
