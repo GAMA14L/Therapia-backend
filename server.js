@@ -66,6 +66,9 @@ Escribe en español latino neutro. Eres una IA de apoyo emocional, no un sustitu
   }
 });
 
+const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
   console.log(`🧠 Servidor TherapIA corriendo en http://localhost:${PORT}`);
 });
+
