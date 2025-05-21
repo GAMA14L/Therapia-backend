@@ -11,18 +11,22 @@ const openai = new OpenAI({
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// CORS mejorado para producción
-app.use(cors({
-  origin: 'https://therapia-frontend.vercel.app/', // Puedes reemplazar '*' por tu dominio de frontend: 'https://therapia-frontend.vercel.app'
-  methods: ['GET', 'POST'],
-}));
-
+app.use(cors());
 app.use(bodyParser.json());
+
+// Prueba para saber si el servidor está vivo
+app.get('/', (req, res) => {
+  res.send('TherapIA backend funcionando');
+});
 
 let history = [];
 
 app.post('/chat', async (req, res) => {
   const userMessage = req.body.message;
+
+  if (!userMessage) {
+    return res.status(400).json({ error: 'Mensaje vacío' });
+  }
 
   const systemPrompt = {
     role: 'system',
@@ -68,13 +72,11 @@ Eres una IA de apoyo emocional, no un sustituto de un profesional de la salud me
 
     res.json({ aiResponse, history });
   } catch (error) {
-    console.error('Error al comunicarse con la IA:', error);
-    res.status(500).json({ aiResponse: 'Lo siento, hubo un problema al conectar con la IA. Inténtalo más tarde.' });
+    console.error('Error al comunicarse con OpenAI:', error);
+    res.status(500).json({ aiResponse: 'Lo siento, hubo un problema al conectar con la IA.' });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`🧠 Servidor TherapIA corriendo en http://localhost:${PORT}`);
+  console.log(`✅ Servidor TherapIA corriendo en http://localhost:${PORT}`);
 });
-
-
