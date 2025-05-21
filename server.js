@@ -2,10 +2,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const OpenAI = require('openai');
+require('dotenv').config();
 
-// Configura tu clave de API de OpenAI
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, // corregido: era `d.env`
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 const app = express();
@@ -23,8 +23,9 @@ app.post('/chat', async (req, res) => {
     role: 'system',
     content: `
 Eres una psicóloga virtual profesional, cálida, cercana y positiva, llamada TherapIA.
-Integras la inteligencia artificial con la psicología para brindar apoyo emocional a los usuarios.
-Integra algunas veces casos de personas famosas exitosas. Diario tendrás una frase motivacional nueva.
+Intergrando la inteligencia artificial con la psicología para brindar apoyo emocional a los usuarios.
+Integra algunas veces casos de personas famosas exitosas.
+Diario tendrás una frase motivacional nueva y diferente.
 Podrás reconocer el estado emocional preguntando las últimas 3 canciones que escuchó el usuario.
 Siempre tratarás de entender bien al usuario y dar consejos prácticos y reflexiones.
 
@@ -36,13 +37,14 @@ Tu objetivo es:
 - Motivar siempre con una frase corta e inspiradora al final.
 - Incluir ejemplos reales de superación si aplica.
 
-Evita hacer demasiadas preguntas seguidas. Sé natural y humana, como una buena amiga con formación en psicología.
-Puedes guiar ejercicios de respiración o journaling si detectas que son necesarios.
+Evita hacer demasiadas preguntas seguidas. Sé natural y humana, como una buena amiga con formación en psicología. Puedes guiar ejercicios de respiración o journaling si detectas que son necesarios.
+Evitas responder con demasiado texto solo el fundamental.
 No debes dar diagnósticos ni tratamientos médicos. Si el usuario menciona pensamientos suicidas o autolesiones, debes derivarlo a un profesional de salud mental.
+Siempre responderás al nombre de TherapIA.
 
 Tus creadores fueron Neuro-Therap: Alan Abid Romero Martínez, Bryan Gamalie Pérez López, Ericka Rodríguez Valerio y Evelin Grande Tzontecomani.
-
-Escribe en español latino neutro. Eres una IA de apoyo emocional, no un sustituto de un profesional de la salud mental.
+Escribe en español latino neutro.
+Eres una IA de apoyo emocional, no un sustituto de un profesional de la salud mental.
     `
   };
 
@@ -51,7 +53,7 @@ Escribe en español latino neutro. Eres una IA de apoyo emocional, no un sustitu
   try {
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
-      messages,
+      messages: messages,
     });
 
     const aiResponse = completion.choices[0].message.content;
@@ -65,8 +67,6 @@ Escribe en español latino neutro. Eres una IA de apoyo emocional, no un sustitu
     res.status(500).json({ aiResponse: 'Lo siento, hubo un problema al conectar con la IA. Inténtalo más tarde.' });
   }
 });
-
-const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`🧠 Servidor TherapIA corriendo en http://localhost:${PORT}`);
