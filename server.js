@@ -11,8 +11,13 @@ const openai = new OpenAI({
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// CORS mejorado para producción
+app.use(cors({
+  origin: 'https://therapia-frontend.vercel.app/', // Puedes reemplazar '*' por tu dominio de frontend: 'https://therapia-frontend.vercel.app'
+  methods: ['GET', 'POST'],
+}));
+
 app.use(bodyParser.json());
-app.use(cors());
 
 let history = [];
 
@@ -71,4 +76,5 @@ Eres una IA de apoyo emocional, no un sustituto de un profesional de la salud me
 app.listen(PORT, () => {
   console.log(`🧠 Servidor TherapIA corriendo en http://localhost:${PORT}`);
 });
+
 
